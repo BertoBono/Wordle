@@ -1,33 +1,72 @@
 import random
+import os
+
+os.system('cls')
+
+estadisticas = {
+    'partidas': 0, 'racha': 0, 'mejorRacha': 0,
+    'aciertos': 0, 'fallos': 0
+}
 
 palabras = []
 palabrasNoEncontradas = []
-respuesta = 's'
-puntajes = {
-    'partidas': 0, 'racha': 0, 'mejorRacha': 0,
-    'aciertos': 0,
-    '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0,
-    'fallos': 0
-}
-
-with open("posiblesPalabras.txt", "r") as archivo:
-    for x in archivo:
-        palabras.append(x.strip())
+seguir = 's'
 
 def mostrarResultados():
-    porcentajeVictorias = (puntajes['aciertos']/(puntajes['partidas']))*100
-    print("\
-        \nEstadísticas:\
-            \nJugadas: %i | Victorias: %d (Porcentaje) | Racha Actual: %i | Mejor Racha: %i\
-        \nDistribución:\
-            \nIntento 1:\t%i\nIntento 2:\t%i\nIntento 3:\t%i\nIntento 4:\t%i\nIntento 5:\t%i\nIntento 6:\t%i\nFallos:\t\t%i"\
-        % (puntajes['partidas'], porcentajeVictorias, puntajes['racha'], puntajes['mejorRacha'],\
-        puntajes['1'], puntajes['2'], puntajes['3'], puntajes['4'], puntajes['5'], puntajes['6'], puntajes['fallos']))
+    porcentajeVictorias = (estadisticas['aciertos']/(estadisticas['partidas']))*100
+    print("\nEstadísticas:\
+           \nJugadas: %i | Victorias: %d (Porcentaje) | Racha Actual: %i | Mejor Racha: %i"
+           % (estadisticas['partidas'], porcentajeVictorias, estadisticas['racha'], estadisticas['mejorRacha']))
+    print("Distribución:")
+    i = 1
+    while i <= cantidadIntentos:
+        print("%i: %i" % (i, estadisticas[i.__str__()]))
+        i += 1
+    print("Fallos: %i" % (estadisticas['fallos']))
 
-def compararPalabras(ingreso):
+def setLetras():
+    cantidadLetras = int(input("Ingrese la cantidad de letras para las palabras (El valor debe ser un número entero desde el 5 al 8): "))
+    while cantidadLetras < 5 or cantidadLetras > 8:
+        cantidadLetras = int(input("¡Cantidad de letras no posible!\nIngrese la cantidad de letras para las palabras (El valor debe ser un número entero desde el 5 al 8): "))
+    os.system('cls')
+    
+    with open("posiblesPalabras%iletras.txt" % (cantidadLetras), "r") as archivo:
+        for x in archivo:
+            palabras.append(x.strip())
+            
+    return cantidadLetras
+
+def setIntentos():
+    cantidadIntentos = int(input("Ingrese la cantidad de intentos para adivinar (El valor debe ser un número entero desde el 3 al 9): "))
+    while cantidadIntentos < 3 or cantidadIntentos > 9:
+        cantidadIntentos = int(input("¡Cantidad de intentos no posible!\nIngrese la cantidad de intentos para adivinar (El valor debe ser un número entero desde el 3 al 9): "))
+    os.system('cls')
+
+    i = 1
+    while i <= cantidadIntentos:
+        estadisticas[i.__str__()] = 0
+        i += 1
+        
+    return cantidadIntentos
+        
+cantidadLetras = setLetras()
+cantidadIntentos = setIntentos()      
+
+def setDificultad():
+    aceptar = ''
+    while aceptar != 's':
+        print("¿Está seguro que quiere ir con esta dificultad?\n\
+            Cantidad de letras: %i\n\
+            Cantidad de intentos: %i\n\
+            Advertencia: La dificultad no puede ser cambiada a menos que se reinicie el programa."
+            % (cantidadLetras, cantidadIntentos))
+        aceptar = input("Para Aceptar ingrese la letra 's': ").lower()
+        os.system('cls')
+
+def compararPalabras(palabraIngresada):
     i = 0
     coincidencias = ''
-    for x in ingreso:
+    for x in palabraIngresada:
         if x == palabra[i]:
             coincidencias += '='
         elif x in palabra:
@@ -37,68 +76,65 @@ def compararPalabras(ingreso):
         i += 1
     return coincidencias
 
-def imprimirConEspacios(palabra):
+def imprimirPalabraConEspacios(palabra):
     for x in palabra:
         print(x, end=' ')
 
 def acertar():
     print("\nACERTASTE!!!")
-    puntajes['aciertos'] += 1
-    puntajes[intentos.__str__()] += 1
-    if puntajes['mejorRacha'] == puntajes['racha']:
-        puntajes['mejorRacha'] += 1
-    puntajes['racha'] += 1
+    estadisticas['aciertos'] += 1
+    estadisticas[intento.__str__()] += 1
+    if estadisticas['mejorRacha'] == estadisticas['racha']:
+        estadisticas['mejorRacha'] += 1
+    estadisticas['racha'] += 1
 
 def fallar():
     print("\nFALLASTE!!!")
     print("La palabra era %s" % (palabra))
-    puntajes['fallos'] += 1
-    puntajes['racha'] = 0
+    estadisticas['fallos'] += 1
+    estadisticas['racha'] = 0
 
 def añadirPalabras(palabra):
-    with open("posiblesPalabras.txt", "a+") as archivo:
+    with open("posiblesPalabras%iletras.txt" % (cantidadLetras), "a+") as archivo:
         archivo.write(palabra + '\n')
-        palabras.append(palabra.strip())        
-        
-while respuesta == 's':
-    palabra = palabras[random.randrange(0, len(palabras))]
-    puntajes['partidas'] += 1
-    intentos = 1
-    while intentos <= 6:
-        ingreso = ''
-        print()
-        while ingreso not in palabras:
-            palabrasNoEncontradas.append(ingreso)
-            ingreso = input("Ingrese una palabra de 5 letras: ").upper()
-            if ingreso not in palabras:
-                print("Esa palabra no se encuentra entre las posibles palabras.")
-        ingreso = ingreso.upper()
+        palabras.append(palabra.strip())
+        palabrasNoEncontradas.remove(x)
+ 
+setDificultad()
 
-        imprimirConEspacios(ingreso)
-        print()
-        imprimirConEspacios(compararPalabras(ingreso))
+while 1 != 2:
+    palabra = palabras[random.randrange(0, len(palabras))]
+    estadisticas['partidas'] += 1
+    intento = 1
+    while intento <= cantidadIntentos:
+        palabraIngresada = input("Ingrese una palabra de %i letras: " % (cantidadLetras)).upper()
+        while palabraIngresada not in palabras:
+            if len(palabraIngresada) == cantidadLetras:
+                palabrasNoEncontradas.append(palabraIngresada)
+            palabraIngresada = input("Esa palabra no se encuentra entre la lista de posibles palabras de %i letras\nIngrese una palabra de %i letras: " % (cantidadLetras, cantidadLetras)).upper()
         
-        if ingreso == palabra:
+        imprimirPalabraConEspacios(palabraIngresada)
+        print()
+        imprimirPalabraConEspacios(compararPalabras(palabraIngresada))
+    
+        if palabraIngresada == palabra:
             acertar()
-            intentos = 999
-        elif intentos == 6:
+            intento = 999
+        elif intento == cantidadIntentos:
             fallar()
-        intentos += 1
     
-    mostrarResultados()
-    print()
+        intento += 1
+        print()
+        
+    mostrarResultados()    
+    
     for x in palabrasNoEncontradas:
-            if x not in palabras and len(x) == 5:
-                respuesta = ''
-                while respuesta != 's' and respuesta != 'n':
-                    respuesta = input("¿Le gustaría añadir la palabra %s a la lista de posibles palabras? (s = sí/n = no): " % (x))
-                    if respuesta == 's':
-                        añadirPalabras(x)
-                    elif respuesta == 'n':
-                        print("La palabra %s no se ha añadido a la lista de posibles palabras." % (x))
-                        palabrasNoEncontradas.remove(x)
-    
-    respuesta = ''
-    print()
-    while respuesta != 's' and respuesta != 'n':
-        respuesta = input("¿Seguir jugando? (s = sí/n = no): ")
+        respuesta = input("¿Le gustaría añadir la palabra %s a la lista de posibles palabras? (s = sí/n = no): " % (x)).lower()
+        while respuesta != 's' and respuesta != 'n':
+            respuesta = input("¡Respuesta no válida!\n¿Le gustaría añadir la palabra %s a la lista de posibles palabras? (s = sí/n = no): " % (x)).lower()
+        if respuesta == 's':
+            añadirPalabras(x)
+        else:
+            print("La palabra %s no se ha añadido a la lista de posibles palabras." % (x))
+            palabrasNoEncontradas.remove(x)
+        
