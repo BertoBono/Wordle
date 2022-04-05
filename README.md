@@ -1,2 +1,2 @@
 # INSTRUCCIONES: 
-* 
+*   Encerder el programa!
