@@ -10,11 +10,23 @@ estadisticas = {
 
 palabras = []
 palabrasNoEncontradas = []
-seguir = 's'
+letras = {
+    'A': '', 'B': '', 'C': '', 'D': '',
+    'E': '', 'F': '', 'G': '', 'H': '',
+    'I': '', 'J': '', 'K': '', 'L': '',
+    'M': '', 'N': '', 'O': '', 'P': '',
+    'Q': '', 'R': '', 'S': '', 'T': '',
+    'U': '', 'V': '', 'W': '', 'X': '',
+    'Y': '', 'Z': ''
+}
+palabrasUsadas = {
+    
+}
+terminar = False
 
 def mostrarResultados():
     porcentajeVictorias = (estadisticas['aciertos']/(estadisticas['partidas']))*100
-    print("\nEstadísticas:\
+    print("Estadísticas:\
            \nJugadas: %i | Victorias: %d (Porcentaje) | Racha Actual: %i | Mejor Racha: %i"
            % (estadisticas['partidas'], porcentajeVictorias, estadisticas['racha'], estadisticas['mejorRacha']))
     print("Distribución:")
@@ -60,8 +72,10 @@ def setDificultad():
             Cantidad de intentos: %i\n\
             Advertencia: La dificultad no puede ser cambiada a menos que se reinicie el programa."
             % (cantidadLetras, cantidadIntentos))
-        aceptar = input("Para Aceptar ingrese la letra 's': ").lower()
+        aceptar = input("¿Desea comenzar con el juego? (s = sí): ").lower()
         os.system('cls')
+
+setDificultad()
 
 def compararPalabras(palabraIngresada):
     i = 0
@@ -69,16 +83,21 @@ def compararPalabras(palabraIngresada):
     for x in palabraIngresada:
         if x == palabra[i]:
             coincidencias += '='
+            letras[x] = 'Coincide'
         elif x in palabra:
             coincidencias += '-'
+            letras[x] = 'Contiene'
         else:
             coincidencias += ' '
+            letras[x] = 'No se encuentra'
         i += 1
     return coincidencias
 
 def imprimirPalabraConEspacios(palabra):
+    palabraConEspacios = ''
     for x in palabra:
-        print(x, end=' ')
+        palabraConEspacios += x + ' '
+    return palabraConEspacios
 
 def acertar():
     print("\nACERTASTE!!!")
@@ -94,47 +113,80 @@ def fallar():
     estadisticas['fallos'] += 1
     estadisticas['racha'] = 0
 
+def imprimirLetras():
+    print("Letras Usadas: ")
+    i = 0
+    for x in letras:
+        print("%s: %s\n" % (x, letras[x]), end=' ')
+        i += 1
+    print()
+
+def imprimirPalabrasUsadas():
+    print("Palabras usadas: ")
+    for x in palabrasUsadas:
+        print("%s\n%s\n" % (x, palabrasUsadas[x]))
+
 def añadirPalabras(palabra):
     with open("posiblesPalabras%iletras.txt" % (cantidadLetras), "a+") as archivo:
         archivo.write(palabra + '\n')
         palabras.append(palabra.strip())
         palabrasNoEncontradas.remove(x)
- 
-setDificultad()
 
-while 1 != 2:
+def registrarEstadisticas():
+    with open("registroEstadisticas.txt", "a+") as archivo:
+        porcentajeVictorias = (estadisticas['aciertos']/(estadisticas['partidas']))*100
+        archivo.write("Estadisticas:\n")
+        archivo.write("Jugadas: %i | Victorias: %d (Porcentaje) | Racha Actual: %i | Mejor Racha: %i" % (estadisticas['partidas'], porcentajeVictorias, estadisticas['racha'], estadisticas['mejorRacha']))
+        archivo.write("\nDistribucion\n")
+        i = 1
+        while i <= cantidadIntentos:
+            archivo.write("%i: %i\n" % (i, estadisticas[i.__str__()]))
+            i += 1
+        archivo.write("Fallos: %i" % (estadisticas['fallos']))
+        archivo.write('\n\n')
+
+while terminar == False:
     palabra = palabras[random.randrange(0, len(palabras))]
     estadisticas['partidas'] += 1
     intento = 1
     while intento <= cantidadIntentos:
+        os.system('cls')
+        if intento > 1:
+            imprimirPalabrasUsadas()
+            print()
+            imprimirLetras()
         palabraIngresada = input("Ingrese una palabra de %i letras: " % (cantidadLetras)).upper()
         while palabraIngresada not in palabras:
             if len(palabraIngresada) == cantidadLetras:
                 palabrasNoEncontradas.append(palabraIngresada)
             palabraIngresada = input("Esa palabra no se encuentra entre la lista de posibles palabras de %i letras\nIngrese una palabra de %i letras: " % (cantidadLetras, cantidadLetras)).upper()
         
-        imprimirPalabraConEspacios(palabraIngresada)
-        print()
-        imprimirPalabraConEspacios(compararPalabras(palabraIngresada))
-    
+        palabraConEspacios = imprimirPalabraConEspacios(palabraIngresada)
+        print(palabraConEspacios)
+        coincidencias = imprimirPalabraConEspacios(compararPalabras(palabraIngresada))
+        print(coincidencias)
+
         if palabraIngresada == palabra:
             acertar()
             intento = 999
         elif intento == cantidadIntentos:
             fallar()
-    
+        elif intento < cantidadIntentos:
+            palabrasUsadas[palabraConEspacios] = coincidencias
+        
         intento += 1
         print()
         
-    mostrarResultados()    
+    mostrarResultados()
     
     for x in palabrasNoEncontradas:
-        respuesta = input("¿Le gustaría añadir la palabra %s a la lista de posibles palabras? (s = sí/n = no): " % (x)).lower()
-        while respuesta != 's' and respuesta != 'n':
-            respuesta = input("¡Respuesta no válida!\n¿Le gustaría añadir la palabra %s a la lista de posibles palabras? (s = sí/n = no): " % (x)).lower()
+        respuesta = input("¿Le gustaría añadir la palabra %s a la lista de posibles palabras? (s = sí): " % (x)).lower()
         if respuesta == 's':
             añadirPalabras(x)
         else:
             print("La palabra %s no se ha añadido a la lista de posibles palabras." % (x))
             palabrasNoEncontradas.remove(x)
-        
+    
+    if input("¿Desea continuar jugando? (s = sí): ").lower() != 's':
+        terminar = True
+        registrarEstadisticas()
