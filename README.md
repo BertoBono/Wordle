@@ -4,5 +4,4 @@
   * 'posiblesPalabras6letras.txt'
   * 'posiblesPalabras7letras.txt'
   * 'posiblesPalabras8letras.txt'
-  * *archivo donde se guarden estadísticas*
-* 
+  * 'registroEstadisticas.txt'
