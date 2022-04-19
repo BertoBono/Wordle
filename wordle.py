@@ -4,19 +4,17 @@ import os
 
 os.system('cls')
 
-estadisticasJug1 = {
+estJug1 = {
     'partidas': 0, 'racha': 0, 'mejorRacha': 0,
     'aciertos': 0, 'fallos': 0,
     'fin': 0.0, 'tiempo': []
 }
-estadisticasJug2 = {
+estJug2 = {
     'partidas': 0, 'racha': 0, 'mejorRacha': 0,
     'aciertos': 0, 'fallos': 0,
     'fin': 0.0, 'tiempo': []
 }
-estadisticasJugador = [
-    estadisticasJug1, estadisticasJug2
-]
+estadisticasJugador = [estJug1, estJug2]
 palabras = []
 palabrasNoEncontradas = []
 letras = {
@@ -241,12 +239,10 @@ while terminar == False:
     vaciarListaLetras()
     palabrasNoEncontradas.clear()
     
-    if input("¿Desea continuar jugando? (s = sí): ").lower() != 's':
-        terminar = True
-        
-        registrarEstadisticas(0)
-        if cantidadJugadores == 2:
-            registrarEstadisticas(1)
-    
     turno = cambiarTurno(turno)
-    
+    if input("¿Desea continuar jugando? (s = sí): ").lower() != 's':
+            terminar = True
+            
+            registrarEstadisticas(0)
+            if cantidadJugadores == 2:
+                registrarEstadisticas(1)
